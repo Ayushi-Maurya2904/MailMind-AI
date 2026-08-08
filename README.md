@@ -1,330 +1,65 @@
-# 📬 MailMind AI
+# MailMind AI
 
-### Turn messy emails into clear actions.
+MailMind AI is a static React MVP that turns a pasted email into a structured, actionable briefing. It is designed for a live college hackathon demo and does not claim access to a real inbox, Gmail, or any external integration.
 
-**MailMind AI** is an AI-powered email intelligence assistant that transforms unstructured emails into concise, actionable insights.
+## Features
 
-Instead of simply summarizing an email, MailMind answers:
+- Paste or type an email into the analysis workspace.
+- Analyze against the MailMind JSON contract: summary, priority, reasons, category, tasks, deadlines, phishing/spam classification, sentiment, and suggested reply.
+- View results in a responsive dashboard instead of raw JSON.
+- Clearly separates extracted email facts from AI-generated safe recommendations.
+- Includes three immediately usable specimens: interview confirmation, suspicious Spotify/payment message, and a low-priority newsletter.
+- Includes empty, loading, and validation/error states.
+- Applies safety rules for untrusted email content. Suspicious messages never receive a suggested reply and show an official-channel verification recommendation.
 
-> **What is this email about? How important is it? What do I need to do? When do I need to do it? Is it safe? And should I reply?**
+## Run locally
 
----
+```bash
+pnpm install
+pnpm dev
+```
 
-## 🚀 Live Demo
+Then open the local Vite URL printed in the terminal. For a production build:
 
-🔗 **Demo:** `ADD_DEPLOYED_LINK_HERE`
+```bash
+pnpm build
+pnpm start
+```
 
-🔗 **Repository:** `ADD_GITHUB_LINK_HERE`
+Type checking is available with `pnpm check`.
 
----
+## Architecture
 
-## 🎯 Problem
+This is intentionally a frontend-only project. The main experience lives in `client/src/pages/Home.tsx`, where the interface, demo specimens, schema types, state machine, and isolated mock model adapter are easy to inspect. Shared UI primitives come from the scaffold’s shadcn/ui component set.
 
-Students and professionals receive dozens of emails every day.
+The analysis adapter is the `analyzeWithMockModel(email)` function in `Home.tsx`. It currently uses deterministic keyword/context matching so the demo works without an API key. To connect a real model later, replace that function with a server-side request that sends the MailMind Master Prompt V2, validates the returned JSON, and falls back to a safe error state for malformed responses. API keys must never be placed in frontend code.
 
-Important information is often buried inside long messages, making it difficult to quickly identify:
+## Output contract
 
-* What actually matters
-* Which emails require action
-* Which tasks have deadlines
-* Which messages are urgent
-* Whether an email may be phishing
-* How to respond appropriately
-
-Manually processing every email takes time and can lead to missed deadlines and delayed responses.
-
----
-
-## 💡 Solution
-
-MailMind AI converts an unstructured email into structured, actionable intelligence.
-
-### One email → one decision-ready output
-
-📧 **Email**
-
-↓
-
-📝 Summary
-
-🚦 Priority
-
-🏷️ Category
-
-✅ Tasks
-
-⏰ Deadlines
-
-🛡️ Security Analysis
-
-💬 Reply Suggestion
-
----
-
-## ✨ Core Features
-
-### 📧 Smart Summarization
-
-Creates a concise summary while preserving important context.
-
-### 🚦 Priority Detection
-
-Classifies emails as:
-
-* 🔴 High
-* 🟡 Medium
-* 🟢 Low
-
-Priority is determined using evidence such as urgency, deadlines, required action, consequences of delay, and context.
-
-### 🏷️ Email Categorization
-
-Automatically categorizes emails into:
-
-* Work
-* College
-* Personal
-* Finance
-* Promotional
-* Other
-
-### ✅ Task Extraction
-
-Identifies meaningful actions the recipient is expected to perform.
-
-### ⏰ Deadline Extraction
-
-Extracts explicit deadlines without inventing missing information.
-
-### 🛡️ Phishing & Spam Analysis
-
-Analyzes suspicious signals including:
-
-* Suspicious links
-* Requests for sensitive information
-* Financial requests
-* Impersonation
-* Artificial urgency
-* Threats
-* Sender inconsistencies
-
-### 💬 Smart Reply Generation
-
-Generates a concise, context-aware reply when responding would be useful.
-
-### 🔍 Explainable AI
-
-Important classifications are supported by evidence from the email rather than unexplained labels.
-
----
-
-## 🧠 AI Output
-
-MailMind produces structured JSON that can be consumed directly by the application.
+The mock adapter returns the exact required object shape:
 
 ```json
 {
-  "summary": "...",
-  "priority": "high",
-  "priority_reason": [],
-  "category": "work",
-  "tasks": [],
-  "deadlines": [],
+  "summary": "string",
+  "priority": "low | medium | high",
+  "priority_reason": ["string"],
+  "category": "work | college | personal | finance | promotional | other",
+  "tasks": [{ "task": "string", "deadline": "string or null" }],
   "phishing_spam": {
-    "classification": "safe",
-    "reasons": []
+    "classification": "safe | suspicious | dangerous",
+    "reasons": ["string"]
   },
-  "sentiment": "neutral",
-  "reply": {
-    "tone": "professional",
-    "text": "..."
-  }
+  "sentiment": "positive | neutral | negative | urgent | concerned",
+  "reply": { "tone": "professional | friendly | concise | formal", "text": "string" }
 }
 ```
 
-This structured approach makes the AI output predictable, explainable, and easy to render in the frontend.
+`reply` is allowed to be `null` when no response is appropriate.
 
----
+## Safety behavior
 
-## 🖥️ Product Preview
+Email content is treated as untrusted data. The UI does not execute or follow instructions contained in the email. For the suspicious payment specimen, the app explicitly says not to click the link or share verification codes, passwords, OTPs, or banking credentials, and recommends checking only through the organization’s official app or website.
 
-### Main Dashboard
+## Visual direction
 
-![MailMind AI Dashboard](./screenshots/dashboard.png)
-
-### Email Analysis
-
-![Email Analysis](./screenshots/email-analysis.png)
-
-### Phishing Detection
-
-![Phishing Detection](./screenshots/phishing-detection.png)
-
-### Smart Reply
-
-![Smart Reply](./screenshots/smart-reply.png)
-
-> Screenshots will be added after the final interface is completed.
-
----
-
-## 🔄 How It Works
-
-```text
-User Email
-    ↓
-Email Parsing
-    ↓
-AI Analysis
-    ↓
-┌─────────────────────────────┐
-│ Summary                     │
-│ Priority                    │
-│ Category                    │
-│ Tasks                       │
-│ Deadlines                   │
-│ Security Analysis           │
-│ Sentiment                   │
-│ Smart Reply                 │
-└─────────────────────────────┘
-    ↓
-Actionable Email Intelligence
-```
-
----
-
-## 🧪 Example
-
-### Input
-
-> Your interview has been confirmed for tomorrow at 10:00 AM.
-> Please review the role description and confirm your availability before 6 PM today.
-
-### MailMind Output
-
-**Priority:** 🔴 High
-
-**Category:** Work
-
-**Tasks:**
-
-* Review the role description
-* Prepare for the interview
-* Confirm availability
-
-**Deadline:**
-
-* Today, before 6 PM
-
-**Security:** 🟢 Safe
-
-**Suggested Reply:**
-
-> Hi Recruitment Team,
-> Thank you for the confirmation. I confirm my availability for the interview tomorrow at 10:00 AM. I'll review the role description and prepare accordingly.
->
-> Best,
-> Ayushi
-
----
-
-## 🛠️ Tech Stack
-
-* **Frontend:** React / Next.js
-* **Styling:** Tailwind CSS
-* **AI:** LLM + Prompt Engineering
-* **Backend:** `ADD_AFTER_BUILD`
-* **Deployment:** `ADD_AFTER_BUILD`
-
----
-
-## 🧩 Architecture
-
-```text
-                ┌──────────────────┐
-                │     User Email   │
-                └────────┬─────────┘
-                         ↓
-                ┌──────────────────┐
-                │   Email Parser   │
-                └────────┬─────────┘
-                         ↓
-                ┌──────────────────┐
-                │    AI Engine     │
-                └────────┬─────────┘
-                         ↓
-        ┌────────────────────────────────┐
-        │ Structured Email Intelligence  │
-        ├────────────────────────────────┤
-        │ Summary                        │
-        │ Priority                       │
-        │ Category                       │
-        │ Tasks                          │
-        │ Deadlines                      │
-        │ Phishing Analysis              │
-        │ Sentiment                      │
-        │ Smart Reply                    │
-        └────────────────┬───────────────┘
-                         ↓
-                ┌──────────────────┐
-                │   User Interface │
-                └──────────────────┘
-```
-
----
-
-## 🏆 Why MailMind?
-
-Most email tools focus on **summarization**.
-
-MailMind focuses on **decision-making**.
-
-The goal isn't simply to tell the user what an email says.
-
-The goal is to tell them:
-
-> **What should I understand, what should I do, and what should I be careful about?**
-
----
-
-## 🔐 Safety & Reliability
-
-MailMind is designed to avoid hallucinating important information.
-
-The system:
-
-* Does not invent deadlines
-* Does not invent responsibilities
-* Does not invent sender information
-* Explicitly represents missing information
-* Supports evidence-based classifications
-* Treats suspicious financial and credential requests carefully
-
----
-
-## 📈 Future Scope
-
-Potential future improvements include:
-
-* 🌍 Multi-language email analysis
-* 😊 Sentiment analysis improvements
-* 📅 Calendar event extraction
-* 🎙️ Voice-based email summaries
-* 🔔 Follow-up reminders
-* ✏️ One-click reply customization
-* 📥 Gmail / Outlook integration
-* 📊 Email productivity analytics
-
----
-
-## 👩‍💻 Built For
-
-**PromptWars × GITM Coding Club**
-
-Built with AI, prompt engineering, and a focus on solving a real productivity problem.
-
----
-
-## 📄 License
-
-This project is created for educational and hackathon purposes.
+The interface follows the **Signal Desk** system documented in `ideas.md`: warm editorial surfaces, Space Grotesk display typography, DM Sans body copy, Signal Cobalt action states, and visual evidence/recommendation separation.
