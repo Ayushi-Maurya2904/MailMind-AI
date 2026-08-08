@@ -7,12 +7,11 @@ MailMind AI is an AI-powered email intelligence assistant that transforms unstru
 Built for the **PromptWars × GITM Coding Club** challenge.
 
 ---
-
 ## 🚀 Live Demo
 
-**MailMind AI is deployed and ready to try.**
+**[👉Launch MailMind AI](https://mailmindai-mrushmur.manus.space)**
 
-👉 Open the live application from the repository's deployment link.
+Try the deployed application and paste an email to see MailMind analyze it.
 
 ---
 
